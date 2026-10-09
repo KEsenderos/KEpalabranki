@@ -1,11 +1,11 @@
-/* js/config.js — 定数（KP.Config） — KEpalabranki v1.1.3 */
+/* js/config.js — 定数（KP.Config） — KEpalabranki v1.1.4 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};
 
   KP.Config = {
     APP_NAME: "KEpalabranki",
-    APP_VERSION: "1.1.3",
+    APP_VERSION: "1.1.4",
     DB_NAME: "kepalabranki-db",
     DB_VERSION: 2,
 

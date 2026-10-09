@@ -1,6 +1,6 @@
-/* sw.js — オフライン用キャッシュ・更新検出 — KEpalabranki v1.1.3 */
+/* sw.js — オフライン用キャッシュ・更新検出 — KEpalabranki v1.1.4 */
 "use strict";
-var CACHE_VERSION = "1.1.3"; // KP.Config.APP_VERSION と同じ値にする
+var CACHE_VERSION = "1.1.4"; // KP.Config.APP_VERSION と同じ値にする
 var CACHE_NAME = "kp-cache-" + CACHE_VERSION;
 var APP_SHELL_FILES = [
   "./", "./index.html", "./manifest.webmanifest", "./css/style.css",
@@ -9,7 +9,8 @@ var APP_SHELL_FILES = [
   "./js/screenHome.js", "./js/screenStudy.js", "./js/screenTest.js", "./js/screenProgress.js",
   "./js/screenWords.js", "./js/screenSettings.js", "./js/conj.js", "./js/screenConj.js", "./js/main.js",
   "./data/conjugations.json",
-  "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"
+  "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png",
+  "./icons/favicon.ico", "./icons/favicon-32.png"
 ];
 
 self.addEventListener("install", function (e) {
