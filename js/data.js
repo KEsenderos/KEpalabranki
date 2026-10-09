@@ -1,4 +1,4 @@
-/* js/data.js — メモリ上のデータと保存の窓口（KP.Data） — KEpalabranki v1.0.1 */
+/* js/data.js — メモリ上のデータと保存の窓口（KP.Data） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};
@@ -10,11 +10,12 @@
     daily: new Map(),
     settings: null,
     syncMeta: null,
-    celebratedDay: ""
+    celebratedDay: "",
+    deviceId: ""
   };
 
   function defaultSettings_() {
-    return { goal: C.GOAL_DEFAULT, voiceURI: "", syncUrl: "", syncToken: "" };
+    return { goal: C.GOAL_DEFAULT, voiceURI: "", syncUrl: "", syncToken: "", conjTenses: C.CONJ_TENSES_DEFAULT.slice() };
   }
   function defaultSyncMeta_() {
     return { lastPushAt: 0, lastPullSeq: 0, lastSuccessAt: 0 };
@@ -59,7 +60,12 @@
         if (m.key === "settings") D.settings = Object.assign(defaultSettings_(), m.value);
         if (m.key === "sync") D.syncMeta = Object.assign(defaultSyncMeta_(), m.value);
         if (m.key === "celebratedDay") D.celebratedDay = m.value || "";
+        if (m.key === "deviceId") D.deviceId = m.value || "";
       });
+      if (!D.deviceId) {
+        D.deviceId = KP.Utils.newId("d");
+        return D.setMeta("deviceId", D.deviceId);
+      }
     });
   };
 
@@ -153,6 +159,25 @@
 
   D.saveTest = function (t) { return KP.DB.put("tests", t); };
 
+  D.saveConjLog = function (o) { return KP.DB.put("conjLogs", o); };
+
+  // 5.3b 判定の訂正: カード（と解放の取り消し）と訂正の記録を1回で保存（v1.1）
+  D.fixAnswer = function (card, revCard, fixLog) {
+    var now = now_();
+    card = Object.assign({}, card, { updatedAt: now });
+    D.cards.set(card.id, card);
+    if (revCard) {
+      revCard = Object.assign({}, revCard, { updatedAt: now });
+      D.cards.set(revCard.id, revCard);
+    }
+    fixLog.updatedAt = now;
+    return KP.DB.tx(["cards", "logs"], "readwrite", function (s) {
+      s.cards.put(card);
+      if (revCard) s.cards.put(revCard);
+      s.logs.put(fixLog);
+    });
+  };
+
   D.setMeta = function (key, value) {
     if (key === "celebratedDay") D.celebratedDay = value;
     return KP.DB.put("meta", { key: key, value: value });
@@ -173,21 +198,25 @@
     return d ? d.answers : 0;
   };
 
-  // サーバーから受け取った記録を反映。戻り値は反映した件数
+  // サーバーから受け取った記録を反映。戻り値は新しく保存した記録の配列（v1.1）
   D.mergeFromServer = function (store, arr) {
-    if (!arr || arr.length === 0) return Promise.resolve(0);
-    var put = [];
+    if (!arr || arr.length === 0) return Promise.resolve([]);
     if (store === "words" || store === "cards") {
       var map = store === "words" ? D.words : D.cards;
+      var put = [];
       arr.forEach(function (o) {
         var cur = map.get(o.id);
         if (!cur || o.updatedAt > cur.updatedAt) { map.set(o.id, o); put.push(o); }
       });
-    } else {
-      put = arr; // logs・tests は同じ id なら同じ内容なので、そのまま書く
+      if (put.length === 0) return Promise.resolve([]);
+      return KP.DB.putMany(store, put).then(function () { return put; });
     }
-    if (put.length === 0) return Promise.resolve(0);
-    return KP.DB.putMany(store, put).then(function () { return put.length; });
+    // logs・tests・conjLogs は端末に無い id だけを保存する
+    return KP.DB.existing(store, arr.map(function (o) { return o.id; })).then(function (have) {
+      var fresh = arr.filter(function (o) { return !have.has(o.id); });
+      if (fresh.length === 0) return [];
+      return KP.DB.putMany(store, fresh).then(function () { return fresh; });
+    });
   };
 
   D.categories = function () {

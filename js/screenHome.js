@@ -1,4 +1,4 @@
-/* js/screenHome.js — ホーム（KP.ScreenHome） — KEpalabranki v1.0.1 */
+/* js/screenHome.js — ホーム（KP.ScreenHome） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};

@@ -1,4 +1,4 @@
-/* js/sync.js — スプレッドシートとの同期（KP.Sync） — KEpalabranki v1.0.1 */
+/* js/sync.js — スプレッドシートとの同期（KP.Sync） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};
@@ -13,6 +13,7 @@
   function post_(payload) {
     var s = KP.Data.settings;
     payload.token = s.syncToken;
+    payload.deviceId = KP.Data.deviceId;
     var ctrl = window.AbortController ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, C.SYNC_TIMEOUT_MS);
     var opts = {
@@ -89,15 +90,16 @@
   }
 
   function pull_(state) {
-    return post_({ action: "pull", sinceSeq: KP.Data.syncMeta.lastPullSeq, limit: C.PULL_LIMIT })
+    return post_({ action: "pull", sinceSeq: KP.Data.syncMeta.lastPullSeq, limit: C.PULL_LIMIT, includeOwn: !!state.includeOwn })
       .then(function (j) {
         var data = j.data || {};
         var p = Promise.resolve();
         C.SYNC_SHEETS.forEach(function (st) {
           var arr = (data[st] || []).map(function (r) { return fromSheet_(st, r); });
-          state.count += arr.length;
-          if (st === "logs" && arr.length) state.gotLogs = true;
-          p = p.then(function () { return KP.Data.mergeFromServer(st, arr); });
+          p = p.then(function () { return KP.Data.mergeFromServer(st, arr); }).then(function (fresh) {
+            state.count += fresh.length;
+            if (st === "logs") return KP.Stats.addLogsToDaily(fresh);
+          });
         });
         return p.then(function () {
           var seq = Number(j.lastSeq) || KP.Data.syncMeta.lastPullSeq;
@@ -108,11 +110,9 @@
       });
   }
 
-  function pullAll_() {
-    var state = { count: 0, gotLogs: false };
-    return pull_(state).then(function () {
-      if (state.gotLogs) return KP.Stats.rebuildDaily();
-    }).then(function () { return state.count; });
+  function pullAll_(includeOwn) {
+    var state = { count: 0, includeOwn: includeOwn };
+    return pull_(state).then(function () { return state.count; });
   }
 
   function reason_(err) {
@@ -129,7 +129,7 @@
         return Promise.resolve({ ok: false, reason: "not_set" });
       }
       running_ = true;
-      return push_().then(pullAll_).then(function () {
+      return push_().then(function () { return pullAll_(false); }).then(function () {
         return KP.Data.saveSyncMeta({ lastSuccessAt: Date.now() });
       }).then(function () {
         if (!silent) KP.UI.toast(C.MSG.SYNC_OK);
@@ -155,7 +155,7 @@
       if (!isSet_()) return Promise.resolve({ ok: false, reason: C.MSG.SYNC_NOT_SET, count: 0 });
       if (running_) return Promise.resolve({ ok: false, reason: "busy", count: 0 });
       running_ = true;
-      return KP.Data.saveSyncMeta({ lastPullSeq: 0 }).then(pullAll_).then(function (n) {
+      return KP.Data.saveSyncMeta({ lastPullSeq: 0 }).then(function () { return pullAll_(true); }).then(function (n) {
         return KP.Data.saveSyncMeta({ lastSuccessAt: Date.now() }).then(function () { return { ok: true, count: n }; });
       }, function (err) {
         console.error(err);

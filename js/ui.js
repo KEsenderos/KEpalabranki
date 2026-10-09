@@ -1,4 +1,4 @@
-/* js/ui.js — 共通の画面処理・タブ・トースト（KP.UI） — KEpalabranki v1.0.1 */
+/* js/ui.js — 共通の画面処理・タブ・トースト（KP.UI） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};
@@ -16,7 +16,8 @@
       test: KP.ScreenTest.onShow,
       progress: KP.ScreenProgress.onShow,
       words: KP.ScreenWords.onShow,
-      settings: KP.ScreenSettings.onShow
+      settings: KP.ScreenSettings.onShow,
+      conj: KP.ScreenConj.onShow
     };
   }
 
@@ -35,6 +36,7 @@
       KP.ScreenProgress.init();
       KP.ScreenWords.init();
       KP.ScreenSettings.init();
+      KP.ScreenConj.init();
     },
 
     show: function (name, params) {

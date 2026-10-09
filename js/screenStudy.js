@@ -1,4 +1,4 @@
-/* js/screenStudy.js — 学習（KP.ScreenStudy） — KEpalabranki v1.0.1 */
+/* js/screenStudy.js — 学習（KP.ScreenStudy） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};
@@ -11,6 +11,7 @@
   var choices_ = [];
   var answered_ = false;
   var answerCount_ = 0;
+  var fix_ = null;        // 5.3b 訂正用の写し {beforeCard, beforeRev, done}
 
   function choiceBtn_(i) { return $("btn-choice-" + i); }
 
@@ -28,7 +29,7 @@
     badge.classList.toggle("badge-rev", !esJa);
     var front = $("txt-front");
     if (esJa) { front.textContent = word.es; front.className = "front front-es"; }
-    else { front.innerHTML = U.safeHtml(U.jaFront(word.ja)); front.className = "front front-ja"; }
+    else { front.innerHTML = U.safeHtml(U.jaFront(word.ja, word.pos)); front.className = "front front-ja"; }
     $("btn-speak").hidden = !esJa;
 
     choices_ = KP.Choices.make(card);
@@ -77,6 +78,11 @@
     answered_ = true;
     var card = item_.card, word = KP.Data.wordOf(card);
     var today = U.dayStr();
+    fix_ = null;
+    if (result === C.RESULT.OK && method === C.METHOD.SELF) {
+      var rv = KP.Data.cards.get(card.wordId + ":" + C.DIR.JA_ES);
+      fix_ = { beforeCard: Object.assign({}, card), beforeRev: rv ? Object.assign({}, rv) : null };
+    }
     var r = KP.SRS.applyAnswer(card, result, method, today);
     var now = Date.now();
     var log = {
@@ -96,6 +102,8 @@
     var res = $("txt-result");
     res.textContent = ok ? "○ 正解" : "× もう一度出ます";
     res.className = "result " + (ok ? "result-ok" : "result-ng");
+    $("btn-fix-ng").hidden = !fix_;
+    var verbRev = card.dir === C.DIR.JA_ES && word.pos === "動詞";
     var es = $("txt-answer-es");
     es.innerHTML = "";
     if (word.gender === "m" || word.gender === "f") {
@@ -104,7 +112,10 @@
       g.textContent = C.GENDER_LABEL[word.gender] + " ";
       es.appendChild(g);
     }
-    es.appendChild(document.createTextNode(word.es));
+    es.appendChild(document.createTextNode(verbRev ? U.infinitiveOf(word) : word.es));
+    var orig = $("txt-answer-orig");
+    orig.hidden = !verbRev;
+    orig.textContent = verbRev ? "記事中の形: " + word.es : "";
     $("txt-answer-ja").innerHTML = U.safeHtml(word.ja);
     var ex = $("txt-answer-ex");
     if (word.exEs || word.exJa) {
@@ -125,6 +136,29 @@
     }
     answerCount_++;
     if (answerCount_ % C.SYNC_EVERY_ANSWERS === 0) KP.Sync.syncNow({ silent: true });
+  }
+
+  // 5.3b 「やっぱり間違い」
+  function fix_ng_() {
+    if (!fix_ || !item_) return;
+    var f = fix_; fix_ = null;
+    $("btn-fix-ng").hidden = true;
+    var today = U.dayStr();
+    var r = KP.SRS.applyAnswer(f.beforeCard, C.RESULT.NG, C.METHOD.SELF, today);
+    var rev = null;
+    var curRev = KP.Data.cards.get(f.beforeCard.wordId + ":" + C.DIR.JA_ES);
+    if (f.beforeRev && !f.beforeRev.unlocked && curRev && curRev.unlocked) {
+      rev = Object.assign({}, curRev, { unlocked: false, unlockedAt: 0 });
+    }
+    var now = Date.now(), c = f.beforeCard;
+    var log = { id: U.newId("l"), at: now, cardId: c.id, wordId: c.wordId, dir: c.dir,
+      result: C.RESULT.NG, method: C.METHOD.SELF, mode: C.MODE.FIX, updatedAt: now };
+    KP.Data.fixAnswer(r.card, rev, log).catch(function (e) { console.error(e); KP.UI.toast(C.MSG.SAVE_ERROR); });
+    KP.Queue.requeue(r.card);
+    var res = $("txt-result");
+    res.textContent = "× もう一度出ます";
+    res.className = "result result-ng";
+    KP.UI.toast(C.MSG.FIX_DONE);
   }
 
   function next_() {
@@ -169,8 +203,12 @@
         if (item_) KP.Speech.speak(U.esSpeak(KP.Data.wordOf(item_.card).es));
       });
       $("btn-speak-answer").addEventListener("click", function () {
-        if (item_) KP.Speech.speak(U.esSpeak(KP.Data.wordOf(item_.card).es));
+        if (!item_) return;
+        var w = KP.Data.wordOf(item_.card);
+        var verbRev = item_.card.dir === C.DIR.JA_ES && w.pos === "動詞";
+        KP.Speech.speak(verbRev ? U.infinitiveOf(w) : U.esSpeak(w.es));
       });
+      $("btn-fix-ng").addEventListener("click", fix_ng_);
     },
 
     onShow: function (params) {
@@ -180,6 +218,6 @@
       next_();
     },
 
-    showCard_: showCard_, reveal_: reveal_, answer_: answer_, next_: next_, end_: end_, celebrate_: celebrate_
+    showCard_: showCard_, reveal_: reveal_, answer_: answer_, next_: next_, end_: end_, celebrate_: celebrate_, fix_: fix_ng_
   };
 })();

@@ -1,4 +1,4 @@
-/* js/screenTest.js — 確認テスト（KP.ScreenTest） — KEpalabranki v1.0.1 */
+/* js/screenTest.js — 確認テスト（KP.ScreenTest） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};

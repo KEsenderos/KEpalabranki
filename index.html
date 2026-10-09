@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- index.html — 画面の部品と script の読み込み — KEpalabranki v1.0.1 -->
+<!-- index.html — 画面の部品と script の読み込み — KEpalabranki v1.1.3 -->
 <html lang="ja">
 <head>
   <meta charset="utf-8">
@@ -21,7 +21,7 @@
 
   <!-- ホーム -->
   <section id="screen-home" class="screen" hidden>
-    <header class="app-head"><span class="brand"><b>KE</b>palabranki</span></header>
+    <header class="app-head"><img id="app-logo" class="app-logo" src="icons/icon-192.png" alt="" width="32" height="32"><span class="brand"><b>KE</b>palabranki</span></header>
     <button id="banner-update" class="banner banner-accent" type="button" hidden></button>
     <button id="banner-sync-warn" class="banner banner-warn" type="button" hidden></button>
     <div class="card">
@@ -64,11 +64,12 @@
       <button id="btn-reveal-choices" class="reveal" type="button">4択を見る</button>
     </div>
     <div id="area-answer" class="card answer" hidden>
-      <div id="txt-result" class="result"></div>
+      <div class="result-row"><div id="txt-result" class="result"></div><button id="btn-fix-ng" class="btn-fix" type="button" hidden>やっぱり間違い</button></div>
       <div class="answer-es-row">
         <span id="txt-answer-es" class="answer-es"></span>
         <button id="btn-speak-answer" class="btn-icon" type="button" aria-label="読み上げ">🔊</button>
       </div>
+      <div id="txt-answer-orig" class="answer-orig" hidden></div>
       <div id="txt-answer-ja" class="answer-ja"></div>
       <div id="txt-answer-ex" class="answer-ex" hidden></div>
     </div>
@@ -257,10 +258,90 @@
     <div id="txt-version" class="version"></div>
   </section>
 
+  <!-- 活用（v1.1） -->
+  <section id="screen-conj" class="screen" hidden>
+    <div id="conj-setup">
+      <h2 class="title">活用</h2>
+      <div class="card">
+        <div id="txt-conj-data" class="muted small"></div>
+        <div id="txt-conj-verbs"></div>
+        <div id="box-conj-missing" class="conj-missing" hidden>
+          <div id="txt-conj-missing-msg"></div>
+          <button id="btn-conj-copy-missing" class="btn btn-outline" type="button">一覧をコピー</button>
+          <div id="txt-conj-missing" class="small" hidden></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">出題する時制</div>
+        <div id="conj-tense-btns" class="tense-grid">
+          <button id="btn-conj-tense-IND_PRES" class="seg-btn" type="button" data-tense="IND_PRES">直説法 現在</button>
+          <button id="btn-conj-tense-IND_PRET" class="seg-btn" type="button" data-tense="IND_PRET">直説法 点過去</button>
+          <button id="btn-conj-tense-IND_IMPF" class="seg-btn" type="button" data-tense="IND_IMPF">直説法 線過去</button>
+          <button id="btn-conj-tense-IND_FUT" class="seg-btn" type="button" data-tense="IND_FUT">直説法 未来</button>
+          <button id="btn-conj-tense-IND_COND" class="seg-btn" type="button" data-tense="IND_COND">直説法 過去未来</button>
+          <button id="btn-conj-tense-SUB_PRES" class="seg-btn" type="button" data-tense="SUB_PRES">接続法 現在</button>
+          <button id="btn-conj-tense-SUB_IMPF" class="seg-btn" type="button" data-tense="SUB_IMPF">接続法 過去</button>
+          <button id="btn-conj-tense-IMP_AFF" class="seg-btn" type="button" data-tense="IMP_AFF">命令法 肯定</button>
+          <button id="btn-conj-tense-IMP_NEG" class="seg-btn" type="button" data-tense="IMP_NEG">命令法 否定</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">時制ごとの正答率（直近300問）</div>
+        <ul id="list-conj-stats" class="stage-list"></ul>
+      </div>
+      <div class="grow"></div>
+      <div class="bottom-actions conj-actions">
+        <button id="btn-conj-begin" class="btn btn-primary btn-big" type="button">始める</button>
+      </div>
+    </div>
+    <div id="conj-run" hidden>
+      <div class="top-bar">
+        <button id="btn-conj-quit" class="btn-text" type="button">✕ 中止</button>
+        <span id="txt-conj-qtype" class="phase"></span>
+        <span id="txt-conj-progress" class="muted"></span>
+      </div>
+      <div class="card study-card">
+        <div id="txt-conj-prompt" class="conj-prompt"></div>
+        <button id="btn-conj-speak" class="btn-icon" type="button" aria-label="読み上げ">🔊</button>
+      </div>
+      <div class="choices">
+        <button id="btn-conj-choice-0" class="choice" type="button"></button>
+        <button id="btn-conj-choice-1" class="choice" type="button"></button>
+        <button id="btn-conj-choice-2" class="choice" type="button"></button>
+        <button id="btn-conj-choice-3" class="choice" type="button"></button>
+      </div>
+      <div id="txt-conj-result" class="result" hidden></div>
+      <div id="box-conj-table" class="card conj-box" hidden>
+        <div class="conj-head"><span id="txt-conj-inf" class="conj-inf"></span><span id="txt-conj-meaning" class="muted"></span></div>
+        <div><span id="txt-conj-type" class="type-label"></span></div>
+        <div id="txt-conj-note" class="small"></div>
+        <div id="txt-conj-parts" class="small muted"></div>
+        <div id="list-conj-table"></div>
+      </div>
+      <div class="grow"></div>
+      <div class="bottom-actions">
+        <button id="btn-conj-next" class="btn btn-primary btn-big" type="button" hidden>次へ</button>
+      </div>
+    </div>
+    <div id="conj-result" hidden>
+      <h2 class="title">活用の結果</h2>
+      <div class="card center"><div id="txt-conj-score" class="score"></div></div>
+      <div id="box-conj-wrong" class="card">
+        <div class="label">間違えた問題</div>
+        <ul id="list-conj-wrong" class="plain-list"></ul>
+      </div>
+      <div class="bottom-actions">
+        <button id="btn-conj-back" class="btn btn-outline" type="button">戻る</button>
+        <button id="btn-conj-again" class="btn btn-primary btn-big" type="button">もう一度</button>
+      </div>
+    </div>
+  </section>
+
   <nav id="tabbar" class="tabbar" hidden>
     <button type="button" data-screen="home"><span class="tab-ic">🏠</span>ホーム</button>
     <button type="button" data-screen="progress"><span class="tab-ic">📊</span>進捗</button>
     <button type="button" data-screen="words"><span class="tab-ic">📖</span>単語帳</button>
+    <button type="button" data-screen="conj"><span class="tab-ic">🔤</span>活用</button>
     <button type="button" data-screen="settings"><span class="tab-ic">⚙️</span>設定</button>
   </nav>
 
@@ -279,6 +360,7 @@
 <script src="js/speech.js"></script>
 <script src="js/importer.js"></script>
 <script src="js/sync.js"></script>
+<script src="js/conj.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/screenHome.js"></script>
 <script src="js/screenStudy.js"></script>
@@ -286,6 +368,7 @@
 <script src="js/screenProgress.js"></script>
 <script src="js/screenWords.js"></script>
 <script src="js/screenSettings.js"></script>
+<script src="js/screenConj.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

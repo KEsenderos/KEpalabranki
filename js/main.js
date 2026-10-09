@@ -1,4 +1,4 @@
-/* js/main.js — 起動（KP.Main） — KEpalabranki v1.0.1 */
+/* js/main.js — 起動（KP.Main） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};

@@ -1,4 +1,4 @@
-/* js/utils.js — 日付・文字・CSVの補助（KP.Utils） — KEpalabranki v1.0.1 */
+/* js/utils.js — 日付・文字・CSVの補助（KP.Utils） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};
@@ -6,6 +6,8 @@
 
   function pad2_(n) { return (n < 10 ? "0" : "") + n; }
   function fmtDay_(d) { return d.getFullYear() + "-" + pad2_(d.getMonth() + 1) + "-" + pad2_(d.getDate()); }
+
+  var idSeq_ = 0;
 
   function stripTags_(s) { return String(s || "").replace(/<[^>]*>/g, ""); }
 
@@ -22,10 +24,12 @@
       return fmtDay_(d);
     },
 
+    // v1.1: 連番を加えて、同じミリ秒でも重ならないようにする
     newId: function (prefix) {
       var r = Math.random().toString(36).slice(2, 6);
       while (r.length < 4) r += "0";
-      return prefix + Date.now().toString(36) + r;
+      idSeq_ += 1;
+      return prefix + Date.now().toString(36) + idSeq_.toString(36) + r;
     },
 
     normEs: function (s) {
@@ -43,13 +47,28 @@
       return first.replace(C.POS_PAREN_RE, "").trim();
     },
 
-    jaFront: function (ja) {
+    // pos を渡すと、動詞は意味だけ（v1.1）
+    jaFront: function (ja, pos) {
+      if (pos === "動詞") return KP.Utils.meaningMain(ja);
       var lines = KP.Utils.splitJa(ja);
       var out = [lines[0]];
       if (lines.length > 1 && lines[1].trim() !== "" && !C.LATIN_RE.test(stripTags_(lines[1]))) {
         out.push(lines[1]);
       }
       return out.join("<br>");
+    },
+
+    infinitiveOf: function (word) {
+      if (!word || word.pos !== "動詞") return "";
+      var es = String(word.es || "");
+      var m = es.match(/（([^（）]+)）\s*$/);
+      return (m ? m[1] : es).trim();
+    },
+
+    answerEs: function (card) {
+      var w = KP.Data.wordOf(card);
+      if (!w) return "";
+      return w.pos === "動詞" ? KP.Utils.infinitiveOf(w) : w.es;
     },
 
     esSpeak: function (es) {

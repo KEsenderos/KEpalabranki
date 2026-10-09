@@ -1,4 +1,4 @@
-/* js/queue.js — 出題の順番（KP.Queue） — KEpalabranki v1.0.1 */
+/* js/queue.js — 出題の順番（KP.Queue） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};

@@ -1,4 +1,4 @@
-/* js/importer.js — CSV取り込み（KP.Importer） — KEpalabranki v1.0.1 */
+/* js/importer.js — CSV取り込み（KP.Importer） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};

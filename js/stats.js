@@ -1,4 +1,4 @@
-/* js/stats.js — 段階・連続日数・予定数（KP.Stats） — KEpalabranki v1.0.1 */
+/* js/stats.js — 段階・連続日数・予定数（KP.Stats） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};
@@ -59,21 +59,20 @@
       return activeCards_(function (c) { return c.dir === C.DIR.JA_ES && c.unlocked; });
     },
 
-    rebuildDaily: function () {
-      return KP.DB.getAll("logs").then(function (logs) {
-        var m = new Map();
-        logs.forEach(function (l) {
-          if (l.mode !== C.MODE.STUDY) return;
-          var d = KP.Utils.dayStr(new Date(l.at));
-          var cur = m.get(d) || { day: d, answers: 0 };
-          cur.answers++;
-          m.set(d, cur);
-        });
-        KP.Data.daily = m;
-        var arr = [];
-        m.forEach(function (v) { arr.push(v); });
-        return KP.DB.clear("daily").then(function () { return KP.DB.putMany("daily", arr); });
+    // v1.1: 受け取った（端末に無かった）回答記録だけを、その日の回数に足す
+    addLogsToDaily: function (logs) {
+      var changed = {};
+      (logs || []).forEach(function (l) {
+        if (l.mode !== C.MODE.STUDY) return;
+        var d = KP.Utils.dayStr(new Date(l.at));
+        var cur = KP.Data.daily.get(d) || { day: d, answers: 0 };
+        cur = { day: d, answers: cur.answers + 1 };
+        KP.Data.daily.set(d, cur);
+        changed[d] = cur;
       });
+      var arr = Object.keys(changed).map(function (k) { return changed[k]; });
+      if (!arr.length) return Promise.resolve();
+      return KP.DB.putMany("daily", arr);
     }
   };
 })();

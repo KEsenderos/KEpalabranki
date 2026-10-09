@@ -1,18 +1,18 @@
-/* js/config.js — 定数（KP.Config） — KEpalabranki v1.0.1 */
+/* js/config.js — 定数（KP.Config） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};
 
   KP.Config = {
     APP_NAME: "KEpalabranki",
-    APP_VERSION: "1.0.1",
+    APP_VERSION: "1.1.3",
     DB_NAME: "kepalabranki-db",
-    DB_VERSION: 1,
+    DB_VERSION: 2,
 
     DIR: { ES_JA: "ES_JA", JA_ES: "JA_ES" },
     RESULT: { OK: "OK", NG: "NG" },
     METHOD: { SELF: "SELF", MC: "MC" },
-    MODE: { STUDY: "STUDY", TEST: "TEST" },
+    MODE: { STUDY: "STUDY", TEST: "TEST", FIX: "FIX" },
     SESSION: { NORMAL: "NORMAL", AHEAD: "AHEAD", CUSTOM: "CUSTOM" },
     PHASE_LABEL: {
       DUE: "復習", RELEARN: "もう一度", NEW: "新規", REVERSE: "新規（日→スペ）",
@@ -54,22 +54,36 @@
     LATIN_RE: /[A-Za-zÁÉÍÓÚáéíóúÑñÜü]/,
     GENDER_LABEL: { m: "el", f: "la" },
 
-    SYNC_SHEETS: ["words", "cards", "logs", "tests"],
+    SYNC_SHEETS: ["words", "cards", "logs", "tests", "conjLogs"],
     SYNC_FIELDS: {
       words: ["id", "es", "ja", "category", "pos", "gender", "exEs", "exJa", "note", "source",
         "suspended", "order", "createdAt", "updatedAt"],
       cards: ["id", "wordId", "dir", "unlocked", "unlockedAt", "seen", "streak", "intervalDays",
         "ease", "dueDay", "correctTotal", "wrongTotal", "lapses", "lastAnsweredAt", "updatedAt"],
       logs: ["id", "at", "cardId", "wordId", "dir", "result", "method", "mode", "updatedAt"],
-      tests: ["id", "at", "range", "rangeValue", "count", "correct", "wrongWordIds", "updatedAt"]
+      tests: ["id", "at", "range", "rangeValue", "count", "correct", "wrongWordIds", "updatedAt"],
+      conjLogs: ["id", "at", "verb", "tense", "person", "qtype", "result", "updatedAt"]
     },
     // 同期で受け取った文字を戻すときの型（b=真偽, n=数値。書いていない項目は文字）
     FIELD_TYPES: {
       suspended: "b", unlocked: "b", seen: "b",
       order: "n", createdAt: "n", updatedAt: "n", unlockedAt: "n", streak: "n",
       intervalDays: "n", ease: "n", correctTotal: "n", wrongTotal: "n", lapses: "n",
-      lastAnsweredAt: "n", at: "n", count: "n", correct: "n"
+      lastAnsweredAt: "n", at: "n", count: "n", correct: "n", person: "n"
     },
+
+    CONJ_TENSES: [["IND_PRES", "直説法 現在"], ["IND_PRET", "直説法 点過去"], ["IND_IMPF", "直説法 線過去"],
+      ["IND_FUT", "直説法 未来"], ["IND_COND", "直説法 過去未来"], ["SUB_PRES", "接続法 現在"],
+      ["SUB_IMPF", "接続法 過去"], ["IMP_AFF", "命令法 肯定"], ["IMP_NEG", "命令法 否定"]],
+    CONJ_TENSES_DEFAULT: ["IND_PRES", "IND_PRET", "IND_IMPF", "IND_FUT", "SUB_PRES"],
+    CONJ_PERSONS: ["1人称単数（yo）", "2人称単数（tú）", "3人称単数（él／ella／usted）",
+      "1人称複数（nosotros）", "2人称複数（vosotros）", "3人称複数（ellos／ustedes）"],
+    CONJ_PERSONS_SHORT: ["yo", "tú", "él／ella／usted", "nosotros", "vosotros", "ellos／ustedes"],
+    CONJ_SKIP_PERSON: 4,
+    CONJ_QUIZ_COUNT: 10,
+    CONJ_STATS_RECENT: 300,
+    CONJ_DATA_URL: "./data/conjugations.json",
+    CONJ_QTYPE: { FORM: "FORM", SLOT: "SLOT" },
 
     MSG: {
       SAVE_ERROR: "保存に失敗しました。もう一度試してください",
@@ -93,7 +107,14 @@
       SYNC_WARN: "バックアップが{n}日できていません。設定を確認してください",
       SYNC_WARN_NEVER: "バックアップがまだできていません。設定を確認してください",
       SYNC_WARN_UNSET: "バックアップが未設定です。設定から設定してください",
-      NO_STORAGE: "この環境では記録を保存できません（Safariの通常モードで開いてください）"
+      NO_STORAGE: "この環境では記録を保存できません（Safariの通常モードで開いてください）",
+      CONJ_LOAD_ERROR: "活用データを読み込めませんでした。通信できる所でもう一度開いてください",
+      CONJ_NO_VERBS: "出題できる動詞がありません。単語帳で動詞を学習すると出題されます",
+      CONJ_MISSING: "活用データの無い動詞が{n}個あります",
+      CONJ_COPIED: "一覧をコピーしました。Claudeに渡して活用データの追加を頼んでください",
+      CONJ_FORM_Q: "{inf}（{meaning}）／{tense}・{person}は？",
+      CONJ_SLOT_Q: "{form}（{inf}）は？",
+      FIX_DONE: "不正解に直しました。5枚後にもう一度出ます"
     }
   };
 })();

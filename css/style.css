@@ -1,8 +1,8 @@
-/* css/style.css — 見た目 — KEpalabranki v1.0.1 */
+/* css/style.css — 見た目 — KEpalabranki v1.1.3 */
 :root {
   --bg: #F6F7F9; --surface: #FFFFFF; --line: #DDE1E7; --text: #16191F; --muted: #6B7380;
   --accent: #E8590C; --accent-ink: #FFFFFF; --ok: #2F9E44; --ng: #E03131;
-  --male: #1C7ED6; --female: #D6336C; --mask: #CED4DA;
+  --male: #1C7ED6; --female: #D6336C; --mask: #CED4DA; --accent-soft: #FFE8D9;
   --st-unseen: #ADB5BD; --st-learning: #FAB005; --st-settled: #40C057; --st-mastered: #1C7ED6;
   --font: -apple-system, "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
   --tab-h: 60px;
@@ -11,7 +11,7 @@
   :root {
     --bg: #0E1116; --surface: #171B22; --line: #2A313C; --text: #E8ECF2; --muted: #8D97A6;
     --accent: #FF8A3D; --accent-ink: #1A0E05; --ok: #51CF66; --ng: #FF6B6B;
-    --male: #4DABF7; --female: #F783AC; --mask: #343A40;
+    --male: #4DABF7; --female: #F783AC; --mask: #343A40; --accent-soft: #3A2414;
     --st-unseen: #5C6670; --st-learning: #FCC419; --st-settled: #51CF66; --st-mastered: #4DABF7;
   }
 }
@@ -28,7 +28,7 @@ button { cursor: pointer; }
   min-height: 100vh; min-height: 100dvh;
   padding: calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 16px);
 }
-#screen-home, #screen-progress, #screen-words, #screen-settings { padding-bottom: calc(env(safe-area-inset-bottom) + var(--tab-h) + 16px); }
+#screen-home, #screen-progress, #screen-words, #screen-settings, #screen-conj { padding-bottom: calc(env(safe-area-inset-bottom) + var(--tab-h) + 16px); }
 #test-setup, #test-run, #test-result { display: flex; flex-direction: column; gap: 12px; flex: 1; }
 .grow { flex: 1; }
 
@@ -171,7 +171,7 @@ textarea.input { resize: vertical; }
 /* タブ・トースト */
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(5, 1fr);
   max-width: 480px; margin: 0 auto;
   background: var(--surface); border-top: 1px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom);
@@ -185,3 +185,32 @@ textarea.input { resize: vertical; }
   max-width: 90%; background: var(--text); color: var(--bg);
   padding: 12px 16px; border-radius: 12px; font-size: 15px; z-index: 60; text-align: center;
 }
+
+/* v1.1 */
+.app-head { display: flex; align-items: center; gap: 8px; }
+.app-logo { width: 32px; height: 32px; border-radius: 8px; flex: none; }
+.result-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.btn-fix { min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--ng); background: transparent; color: var(--ng); font-weight: 700; font-size: 14px; }
+.answer-orig { font-size: 14px; color: var(--muted); }
+#conj-setup, #conj-run, #conj-result { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+#screen-conj .conj-actions { bottom: calc(env(safe-area-inset-bottom) + var(--tab-h) + 8px); }
+.tense-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tense-grid .seg-btn { font-size: 15px; }
+.conj-missing { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); padding-top: 8px; }
+.conj-prompt { font-size: 20px; font-weight: 700; word-break: break-word; }
+.conj-box { gap: 6px; }
+.conj-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.conj-inf { font-size: 24px; font-weight: 800; }
+.type-label { display: inline-block; border: 2px solid var(--accent); color: var(--accent); border-radius: 999px; padding: 2px 10px; font-size: 14px; font-weight: 700; }
+.conj-tense { margin-top: 8px; }
+.conj-tense-h { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
+.conj-table { width: 100%; border-collapse: collapse; font-size: 16px; }
+.conj-table th { text-align: left; font-weight: 400; color: var(--muted); width: 42%; padding: 3px 6px; font-size: 14px; }
+.conj-table td { padding: 3px 8px; border-radius: 6px; }
+.conj-table tr.vos th, .conj-table tr.vos td { opacity: .45; }
+.conj-table td.cell-asked { background: var(--accent); color: var(--accent-ink); font-weight: 800; }
+.conj-table td.cell-same { background: var(--accent-soft); font-weight: 700; }
+.conj-table td.cell-wrong { outline: 2px solid var(--ng); outline-offset: -2px; }
+.plain-list { margin: 0; padding-left: 18px; }
+.plain-list li { padding: 4px 0; }
+.tabbar button { font-size: 11px; }

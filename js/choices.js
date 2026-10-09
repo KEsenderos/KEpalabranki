@@ -1,11 +1,13 @@
-/* js/choices.js — 4択の作成（KP.Choices） — KEpalabranki v1.0.1 */
+/* js/choices.js — 4択の作成（KP.Choices） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};
   var C = KP.Config;
 
+  // 日→スペの動詞は原形（v1.1）
   function textOf_(w, isEsJa) {
-    return isEsJa ? KP.Utils.meaningMain(w.ja) : w.es;
+    if (isEsJa) return KP.Utils.meaningMain(w.ja);
+    return w.pos === "動詞" ? KP.Utils.infinitiveOf(w) : w.es;
   }
 
   KP.Choices = {

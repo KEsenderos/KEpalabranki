@@ -1,4 +1,4 @@
-/* js/screenWords.js — 単語帳・編集・取り込み（KP.ScreenWords） — KEpalabranki v1.0.1 */
+/* js/screenWords.js — 単語帳・編集・取り込み（KP.ScreenWords） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};

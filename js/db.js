@@ -1,4 +1,4 @@
-/* js/db.js — IndexedDB の窓口（KP.DB） — KEpalabranki v1.0.1 */
+/* js/db.js — IndexedDB の窓口（KP.DB） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};
@@ -41,6 +41,10 @@
             s = d.createObjectStore("tests", { keyPath: "id" });
             s.createIndex("updatedAt", "updatedAt");
           }
+          if (!d.objectStoreNames.contains("conjLogs")) {
+            s = d.createObjectStore("conjLogs", { keyPath: "id" });
+            s.createIndex("updatedAt", "updatedAt");
+          }
           if (!d.objectStoreNames.contains("daily")) d.createObjectStore("daily", { keyPath: "day" });
           if (!d.objectStoreNames.contains("meta")) d.createObjectStore("meta", { keyPath: "key" });
         };
@@ -74,6 +78,21 @@
         t.onerror = function () { reject(t.error); };
         t.onabort = function () { reject(t.error || new Error("ABORT")); };
         try { fn(obj); } catch (e) { try { t.abort(); } catch (e2) { /* 無視 */ } reject(e); }
+      });
+    },
+
+    // keys のうち、すでにストアにあるもの（v1.1）
+    existing: function (name, keys) {
+      return new Promise(function (resolve, reject) {
+        var found = new Set();
+        if (!keys.length) { resolve(found); return; }
+        var t = db_.transaction(name, "readonly"), st = t.objectStore(name);
+        keys.forEach(function (k) {
+          var r = st.count(k);
+          r.onsuccess = function () { if (r.result > 0) found.add(k); };
+        });
+        t.oncomplete = function () { resolve(found); };
+        t.onerror = function () { reject(t.error); };
       });
     },
 

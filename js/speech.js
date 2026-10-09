@@ -1,4 +1,4 @@
-/* js/speech.js — 読み上げ（KP.Speech） — KEpalabranki v1.0.1 */
+/* js/speech.js — 読み上げ（KP.Speech） — KEpalabranki v1.1.3 */
 (function () {
   "use strict";
   var KP = window.KP = window.KP || {};
