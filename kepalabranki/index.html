@@ -1,0 +1,291 @@
+<!doctype html>
+<!-- index.html — 画面の部品と script の読み込み — KEpalabranki v1.0.1 -->
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="KEpalabranki">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#F6F7F9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0E1116" media="(prefers-color-scheme: dark)">
+  <title>KEpalabranki</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <div id="fatal" class="fatal" hidden></div>
+
+  <!-- ホーム -->
+  <section id="screen-home" class="screen" hidden>
+    <header class="app-head"><span class="brand"><b>KE</b>palabranki</span></header>
+    <button id="banner-update" class="banner banner-accent" type="button" hidden></button>
+    <button id="banner-sync-warn" class="banner banner-warn" type="button" hidden></button>
+    <div class="card">
+      <div id="txt-streak" class="streak"></div>
+      <div id="banner-not-studied" class="banner-inline" hidden>今日はまだ学習していません</div>
+    </div>
+    <div class="card">
+      <div class="goal-row"><span id="txt-today-count" class="goal-count"></span><span id="txt-goal" class="muted"></span></div>
+      <div class="bar"><div id="bar-goal" class="bar-fill"></div></div>
+    </div>
+    <div class="card">
+      <div id="txt-due-count" class="due"></div>
+      <div class="muted"><span id="txt-tomorrow-count"></span> ・ <span id="txt-week-count"></span></div>
+    </div>
+    <div class="grow"></div>
+    <div class="bottom-actions">
+      <button id="btn-start-ahead" class="btn btn-outline" type="button" hidden>先取り復習</button>
+      <button id="btn-start-test" class="btn btn-outline" type="button">テスト</button>
+      <button id="btn-start-study" class="btn btn-primary btn-big" type="button">学習開始</button>
+    </div>
+  </section>
+
+  <!-- 学習 -->
+  <section id="screen-study" class="screen" hidden>
+    <div class="top-bar">
+      <button id="btn-study-end" class="btn-text" type="button">✕ 終了</button>
+      <span id="txt-study-phase" class="phase"></span>
+      <span id="txt-study-progress" class="muted"></span>
+    </div>
+    <div class="card study-card">
+      <span id="badge-dir" class="badge"></span>
+      <div id="txt-front" class="front"></div>
+      <button id="btn-speak" class="btn-icon" type="button" aria-label="読み上げ">🔊</button>
+    </div>
+    <div id="area-choices" class="choices">
+      <button id="btn-choice-0" class="choice masked" type="button" disabled>？</button>
+      <button id="btn-choice-1" class="choice masked" type="button" disabled>？</button>
+      <button id="btn-choice-2" class="choice masked" type="button" disabled>？</button>
+      <button id="btn-choice-3" class="choice masked" type="button" disabled>？</button>
+      <button id="btn-reveal-choices" class="reveal" type="button">4択を見る</button>
+    </div>
+    <div id="area-answer" class="card answer" hidden>
+      <div id="txt-result" class="result"></div>
+      <div class="answer-es-row">
+        <span id="txt-answer-es" class="answer-es"></span>
+        <button id="btn-speak-answer" class="btn-icon" type="button" aria-label="読み上げ">🔊</button>
+      </div>
+      <div id="txt-answer-ja" class="answer-ja"></div>
+      <div id="txt-answer-ex" class="answer-ex" hidden></div>
+    </div>
+    <div class="grow"></div>
+    <div class="bottom-actions">
+      <div id="row-judge" class="row2">
+        <button id="btn-ng" class="btn btn-ng" type="button">わからない</button>
+        <button id="btn-ok" class="btn btn-primary" type="button">わかる</button>
+      </div>
+      <button id="btn-next" class="btn btn-primary btn-big" type="button" hidden>次へ</button>
+    </div>
+  </section>
+
+  <!-- テスト -->
+  <section id="screen-test" class="screen" hidden>
+    <div id="test-setup">
+      <h2 class="title">テスト</h2>
+      <div class="card">
+        <div class="label">範囲</div>
+        <div class="seg-group">
+          <button id="btn-range-all" class="seg-btn" type="button">全体（学習した単語）</button>
+          <button id="btn-range-mastered" class="seg-btn" type="button">習得済み</button>
+          <button id="btn-range-category" class="seg-btn" type="button">カテゴリ</button>
+        </div>
+        <select id="sel-test-category" class="input" hidden></select>
+      </div>
+      <div class="card">
+        <div class="label">問題数</div>
+        <div class="seg-group seg-row">
+          <button id="btn-count-10" class="seg-btn" type="button">10問</button>
+          <button id="btn-count-20" class="seg-btn" type="button">20問</button>
+          <button id="btn-count-50" class="seg-btn" type="button">50問</button>
+        </div>
+      </div>
+      <div class="bottom-actions">
+        <button id="btn-test-back" class="btn btn-outline" type="button">戻る</button>
+        <button id="btn-test-begin" class="btn btn-primary btn-big" type="button">開始</button>
+      </div>
+    </div>
+    <div id="test-run" hidden>
+      <div class="top-bar">
+        <button id="btn-test-quit" class="btn-text" type="button">✕ 中止</button>
+        <span id="txt-test-progress" class="muted"></span>
+      </div>
+      <div class="card study-card">
+        <div id="txt-test-front" class="front front-es"></div>
+        <button id="btn-test-speak" class="btn-icon" type="button" aria-label="読み上げ">🔊</button>
+      </div>
+      <div class="choices">
+        <button id="btn-test-choice-0" class="choice" type="button"></button>
+        <button id="btn-test-choice-1" class="choice" type="button"></button>
+        <button id="btn-test-choice-2" class="choice" type="button"></button>
+        <button id="btn-test-choice-3" class="choice" type="button"></button>
+      </div>
+      <div id="txt-test-answer" class="result" hidden></div>
+      <div class="grow"></div>
+      <div class="bottom-actions">
+        <button id="btn-test-next" class="btn btn-primary btn-big" type="button" hidden>次へ</button>
+      </div>
+    </div>
+    <div id="test-result" hidden>
+      <h2 class="title">テスト結果</h2>
+      <div class="card center">
+        <div id="txt-test-score" class="score"></div>
+        <div id="txt-test-compare" class="muted"></div>
+      </div>
+      <div id="box-test-wrong" class="card">
+        <div class="label">間違えた単語</div>
+        <ul id="list-test-wrong" class="word-list"></ul>
+      </div>
+      <div class="card">
+        <div class="label">正答率の履歴</div>
+        <div id="chart-test-history" class="chart"></div>
+      </div>
+      <div class="bottom-actions">
+        <button id="btn-test-review" class="btn btn-outline" type="button">間違えた単語を学習</button>
+        <button id="btn-test-home" class="btn btn-primary btn-big" type="button">ホームへ</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 進捗 -->
+  <section id="screen-progress" class="screen" hidden>
+    <h2 class="title">進捗</h2>
+    <div class="card">
+      <div class="label">習得状況（スペ→日）</div>
+      <div id="stage-bar" class="stage-bar"></div>
+      <ul class="stage-list">
+        <li><span class="stage-dot unseen"></span>未学習<span id="txt-stage-unseen" class="num"></span></li>
+        <li><span class="stage-dot learning"></span>学習中<span id="txt-stage-learning" class="num"></span></li>
+        <li><span class="stage-dot settled"></span>定着<span id="txt-stage-settled" class="num"></span></li>
+        <li><span class="stage-dot mastered"></span>習得<span id="txt-stage-mastered" class="num"></span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <ul class="stage-list">
+        <li>全単語<span id="txt-total-words" class="num"></span></li>
+        <li>日→スペが解放された単語<span id="txt-reverse-count" class="num"></span></li>
+        <li>連続日数<span id="txt-progress-streak" class="num"></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 単語帳 -->
+  <section id="screen-words" class="screen" hidden>
+    <h2 class="title">単語帳</h2>
+    <div class="row2">
+      <button id="btn-word-add" class="btn btn-outline" type="button">＋追加</button>
+      <button id="btn-word-import" class="btn btn-outline" type="button">CSV取り込み</button>
+    </div>
+    <input id="input-word-search" class="input" type="search" placeholder="スペイン語・日本語で検索" autocomplete="off">
+    <div class="row-between">
+      <select id="sel-word-category" class="input"></select>
+      <span id="txt-word-count" class="muted nowrap"></span>
+    </div>
+    <ul id="list-words" class="word-list tappable"></ul>
+    <button id="btn-word-more" class="btn btn-outline" type="button" hidden>さらに表示</button>
+  </section>
+
+  <!-- 単語の編集 -->
+  <section id="screen-word-edit" class="screen" hidden>
+    <h2 id="txt-we-title" class="title">単語の編集</h2>
+    <label class="field"><span>スペイン語（必須）</span>
+      <span class="row-between"><input id="input-we-es" class="input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button id="btn-we-speak" class="btn-icon" type="button" aria-label="読み上げ">🔊</button></span></label>
+    <label class="field"><span>日本語（必須。改行できます）</span><textarea id="input-we-ja" class="input" rows="4"></textarea></label>
+    <label class="field"><span>カテゴリ（必須）</span><input id="input-we-category" class="input" type="text" list="list-categories" autocomplete="off"></label>
+    <datalist id="list-categories"></datalist>
+    <label class="field"><span>品詞</span><input id="input-we-pos" class="input" type="text" list="list-pos" autocomplete="off"></label>
+    <datalist id="list-pos"></datalist>
+    <label class="field"><span>名詞の性</span>
+      <select id="sel-we-gender" class="input">
+        <option value="">なし</option><option value="m">男性 el</option><option value="f">女性 la</option>
+      </select></label>
+    <label class="field"><span>例文（スペイン語）</span><input id="input-we-ex-es" class="input" type="text" autocomplete="off" autocapitalize="off"></label>
+    <label class="field"><span>例文（日本語）</span><input id="input-we-ex-ja" class="input" type="text" autocomplete="off"></label>
+    <label class="field"><span>メモ</span><input id="input-we-note" class="input" type="text" autocomplete="off"></label>
+    <label class="field"><span>出典</span><input id="input-we-source" class="input" type="text" autocomplete="off"></label>
+    <div class="bottom-actions">
+      <div class="row2">
+        <button id="btn-we-cancel" class="btn btn-outline" type="button">キャンセル</button>
+        <button id="btn-we-save" class="btn btn-primary" type="button">保存</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 取り込み -->
+  <section id="screen-import" class="screen" hidden>
+    <h2 class="title">CSV取り込み</h2>
+    <input id="input-import-file" type="file" accept=".csv,text/csv,text/plain" hidden>
+    <button id="btn-import-choose" class="btn btn-outline" type="button">ファイルを選ぶ</button>
+    <div id="txt-import-summary" class="card"></div>
+    <label class="field"><span>重複したとき</span>
+      <select id="sel-import-dup" class="input">
+        <option value="SKIP">スキップ</option>
+        <option value="OVERWRITE">上書き（学習記録は残す）</option>
+      </select></label>
+    <div class="grow"></div>
+    <div class="bottom-actions">
+      <div class="row2">
+        <button id="btn-import-cancel" class="btn btn-outline" type="button">キャンセル</button>
+        <button id="btn-import-run" class="btn btn-primary" type="button" disabled>取り込む</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 設定 -->
+  <section id="screen-settings" class="screen" hidden>
+    <h2 class="title">設定</h2>
+    <div class="card">
+      <label class="field"><span>1日の目標（枚）</span><input id="input-goal" class="input" type="number" min="1" max="500" step="1" inputmode="numeric"></label>
+      <label class="field"><span>読み上げ音声</span><select id="sel-voice" class="input"></select></label>
+      <button id="btn-voice-test" class="btn btn-outline" type="button">🔊 試しに読む</button>
+    </div>
+    <div class="card">
+      <div class="label">バックアップ（スプレッドシート）</div>
+      <label class="field"><span>同期のURL</span><input id="input-sync-url" class="input" type="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec"></label>
+      <label class="field"><span>合言葉</span><input id="input-sync-token" class="input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+      <div class="row2">
+        <button id="btn-sync-test" class="btn btn-outline" type="button">接続テスト</button>
+        <button id="btn-sync-now" class="btn btn-outline" type="button">今すぐ同期</button>
+      </div>
+      <button id="btn-sync-restore" class="btn btn-outline" type="button">スプレッドシートから復元</button>
+      <div id="txt-sync-status" class="muted small"></div>
+    </div>
+    <div id="txt-version" class="version"></div>
+  </section>
+
+  <nav id="tabbar" class="tabbar" hidden>
+    <button type="button" data-screen="home"><span class="tab-ic">🏠</span>ホーム</button>
+    <button type="button" data-screen="progress"><span class="tab-ic">📊</span>進捗</button>
+    <button type="button" data-screen="words"><span class="tab-ic">📖</span>単語帳</button>
+    <button type="button" data-screen="settings"><span class="tab-ic">⚙️</span>設定</button>
+  </nav>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <div id="overlay-goal" class="overlay-goal" hidden></div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/db.js"></script>
+<script src="js/data.js"></script>
+<script src="js/srs.js"></script>
+<script src="js/queue.js"></script>
+<script src="js/choices.js"></script>
+<script src="js/stats.js"></script>
+<script src="js/speech.js"></script>
+<script src="js/importer.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/screenHome.js"></script>
+<script src="js/screenStudy.js"></script>
+<script src="js/screenTest.js"></script>
+<script src="js/screenProgress.js"></script>
+<script src="js/screenWords.js"></script>
+<script src="js/screenSettings.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
